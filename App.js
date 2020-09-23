@@ -36,6 +36,13 @@ function Login({ navigation }) {
       />
       <Button
         containerStyle={styles.boton}
+        buttonStyle={{
+          width: 350,
+          height: "100%",
+        }}
+        titleStyle={{
+          fontSize: 20,
+        }}
         title="Sign In"
         onPress={async function () {
           const response = await fetch(
@@ -80,6 +87,7 @@ function Tawkto({ navigation }) {
     <>
       <Button
         title="Log Out"
+        buttonStyle={{ backgroundColor: "red" }}
         onPress={async function () {
           const response = await fetch(
             "http://devapi.doktuz.com:8080/goambu/api/v2/auth/logout"
@@ -177,7 +185,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   boton: {
-    flex: 1,
+    height: 50,
+    marginBottom: 15,
   },
 });
 
