@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, View, Image } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Button, Input } from "react-native-elements";
@@ -77,19 +77,31 @@ function Tawkto({ navigation }) {
     `;
 
   return (
-    <WebView
-      source={{
-        uri:
-          "https://tawk.to/chat/5f6acdfff0e7167d0012e24c/default?currentuser=Johan12345",
-      }}
-      injectedJavaScriptBeforeContentLoaded={injectJS}
-    />
+    <>
+      <Button
+        title="Log Out"
+        onPress={async function () {
+          const response = await fetch(
+            "http://devapi.doktuz.com:8080/goambu/api/v2/auth/logout"
+          );
+          console.log(response.text());
+          navigation.navigate("Login");
+        }}
+      />
+      <WebView
+        source={{
+          uri:
+            "https://tawk.to/chat/5f6acdfff0e7167d0012e24c/default?currentuser=Johan12345",
+        }}
+        injectedJavaScriptBeforeContentLoaded={injectJS}
+      />
+    </>
   );
 }
 
 const Stack = createStackNavigator();
 
-function App({ navigation }) {
+function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -105,18 +117,6 @@ function App({ navigation }) {
           component={Tawkto}
           options={{
             headerLeft: null,
-            headerRight: () => (
-              <Button
-                title="Log Out"
-                onPress={async function () {
-                  const response = await fetch(
-                    "http://devapi.doktuz.com:8080/goambu/api/v2/auth/logout"
-                  );
-                  console.log(response.text());
-                  navigation.navigate("Login");
-                }}
-              />
-            ),
           }}
         />
       </Stack.Navigator>
