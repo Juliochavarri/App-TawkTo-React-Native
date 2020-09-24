@@ -6,6 +6,8 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  View,
+  Text,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -13,9 +15,16 @@ import { Button, Input } from "react-native-elements";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { WebView } from "react-native-webview";
 import { Snackbar } from "react-native-paper";
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItemList,
+  DrawerItem,
+} from "@react-navigation/drawer";
 
 let user = "";
 let pwd = "";
+const Drawer = createDrawerNavigator();
 const inputUser = createRef();
 const inputPwd = createRef();
 const btnSign = createRef();
@@ -24,7 +33,23 @@ function Login({ navigation }) {
   const [showSnack, setShowSnack] = useState(false);
   const [hidePwd, sethidePwd] = useState(true);
   const [errorAuth, setErrorAuth] = useState("");
-  const [focus, setFocus] = useState(true);
+  const [focus, setFocus] = useState(false);
+  const [focusPwd, setFocusPwd] = useState(false);
+
+  const styleInputName = {
+    borderWidth: 2,
+    borderRadius: 5,
+    paddingLeft: 10,
+    width: "90%",
+    borderColor: focus == true ? "white" : "grey",
+  };
+  const styleInputPwd = {
+    borderWidth: 2,
+    borderRadius: 5,
+    paddingLeft: 10,
+    width: "90%",
+    borderColor: focusPwd == true ? "white" : "grey",
+  };
 
   return (
     <ImageBackground
@@ -39,7 +64,7 @@ function Login({ navigation }) {
           <Input
             ref={inputUser}
             containerStyle={styles.nombre}
-            inputContainerStyle={styles.inputStyle}
+            inputContainerStyle={styleInputName}
             inputStyle={{ color: "white" }}
             placeholder="user@gmail.com"
             leftIcon={
@@ -65,13 +90,19 @@ function Login({ navigation }) {
             secureTextEntry={hidePwd}
             inputStyle={{ color: "white" }}
             containerStyle={styles.correo}
-            inputContainerStyle={styles.inputStyle}
+            inputContainerStyle={styleInputPwd}
             placeholder="Password"
+            onFocus={() => {
+              setFocusPwd(true);
+            }}
+            onBlur={() => {
+              setFocusPwd(false);
+            }}
             leftIcon={
               <Icon
                 name={hidePwd == true ? "lock" : "unlock"}
                 size={24}
-                color="grey"
+                color={focusPwd == true ? "white" : "grey"}
                 style={{ marginRight: 5 }}
                 onPress={() => {
                   sethidePwd(!hidePwd);
@@ -93,6 +124,7 @@ function Login({ navigation }) {
               fontSize: 20,
             }}
             loading={loading}
+            loadingProps={{ size: "large" }}
             title="Sign In"
             onPress={async function () {
               setLoading(true);
@@ -115,7 +147,7 @@ function Login({ navigation }) {
                 if (data.currentStatus == "ACTIVE") {
                   inputUser.current.clear();
                   inputPwd.current.clear();
-                  navigation.navigate("Tawkto");
+                  navigation.navigate("DrawerPrueba");
                 } else {
                   inputUser.current.clear();
                   inputPwd.current.clear();
@@ -144,26 +176,14 @@ function Login({ navigation }) {
     </ImageBackground>
   );
 }
-
-function Tawkto({ navigation }) {
-  const injectJS = `
-  var Tawk_API=Tawk_API||{};
-  Tawk_API.visitor = {
-  name : ${user},
-  email : ${user},
-  };
-  
-  var Tawk_LoadStart=new Date();
-  
-    
-    `;
-
+function CustomDrawerContent(props) {
+  const navigation = props.navigation;
   return (
-    <>
-      <Button
-        title="Log Out"
-        buttonStyle={{ backgroundColor: "red" }}
-        onPress={async function () {
+    <DrawerContentScrollView {...props}>
+      <DrawerItemList {...props} />
+      <DrawerItem
+        label="Log Out"
+        onPress={async () => {
           const response = await fetch(
             "http://devapi.doktuz.com:8080/goambu/api/v2/auth/logout"
           );
@@ -171,13 +191,37 @@ function Tawkto({ navigation }) {
           navigation.navigate("Login");
         }}
       />
-      <WebView
-        source={{
-          uri: "https://tawk.to/chat/5f6acdfff0e7167d0012e24c/default",
-        }}
-        injectedJavaScriptBeforeContentLoaded={injectJS}
-      />
-    </>
+    </DrawerContentScrollView>
+  );
+}
+
+function DrawerPrueba() {
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+    >
+      <Drawer.Screen name="Chat" component={Chat} />
+    </Drawer.Navigator>
+  );
+}
+
+function Chat() {
+  const injectJS = `
+  var Tawk_API=Tawk_API||{};
+  Tawk_API.visitor = {
+  name : ${user},
+  email : ${user},
+  };
+  var Tawk_LoadStart=new Date();
+    `;
+
+  return (
+    <WebView
+      source={{
+        uri: "https://tawk.to/chat/5f6acdfff0e7167d0012e24c/default",
+      }}
+      injectedJavaScriptBeforeContentLoaded={injectJS}
+    />
   );
 }
 
@@ -195,11 +239,11 @@ function App() {
           }}
         />
         <Stack.Screen
-          name="Tawkto"
-          component={Tawkto}
-          options={{
+          name="DrawerPrueba"
+          component={DrawerPrueba}
+          /* options={{
             headerLeft: null,
-          }}
+          }} */
         />
       </Stack.Navigator>
     </NavigationContainer>
@@ -244,12 +288,6 @@ const styles = StyleSheet.create({
   },
   boton: {
     height: 50,
-  },
-  inputStyle: {
-    borderWidth: 2,
-    borderRadius: 5,
-    paddingLeft: 10,
-    width: "90%",
   },
   bg: {
     flex: 1,
