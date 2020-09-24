@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  SafeAreaView,
   View,
   Text,
 } from "react-native";
@@ -28,6 +29,7 @@ const Drawer = createDrawerNavigator();
 const inputUser = createRef();
 const inputPwd = createRef();
 const btnSign = createRef();
+const nav = createRef();
 function Login({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [showSnack, setShowSnack] = useState(false);
@@ -147,7 +149,7 @@ function Login({ navigation }) {
                 if (data.currentStatus == "ACTIVE") {
                   inputUser.current.clear();
                   inputPwd.current.clear();
-                  navigation.navigate("DrawerPrueba");
+                  navigation.navigate("Tawkto");
                 } else {
                   inputUser.current.clear();
                   inputPwd.current.clear();
@@ -184,6 +186,7 @@ function CustomDrawerContent(props) {
       <DrawerItem
         label="Log Out"
         onPress={async () => {
+          console.log(nav);
           const response = await fetch(
             "http://devapi.doktuz.com:8080/goambu/api/v2/auth/logout"
           );
@@ -195,17 +198,23 @@ function CustomDrawerContent(props) {
   );
 }
 
-function DrawerPrueba() {
+function Tawkto() {
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      <Drawer.Screen name="Chat" component={Chat} />
+      <Drawer.Screen
+        name="Chat"
+        component={Chat}
+        /* options={{
+          drawerIcon: () => <Image source={require("./assets/icon.png")} />,
+        }} */
+      />
     </Drawer.Navigator>
   );
 }
 
-function Chat() {
+function Chat({ navigation }) {
   const injectJS = `
   var Tawk_API=Tawk_API||{};
   Tawk_API.visitor = {
@@ -216,12 +225,20 @@ function Chat() {
     `;
 
   return (
-    <WebView
-      source={{
-        uri: "https://tawk.to/chat/5f6acdfff0e7167d0012e24c/default",
-      }}
-      injectedJavaScriptBeforeContentLoaded={injectJS}
-    />
+    <SafeAreaView style={{ flex: 1, paddingTop: 60 }}>
+      <Button
+        title="Settings"
+        onPress={() => {
+          navigation.toggleDrawer();
+        }}
+      />
+      <WebView
+        source={{
+          uri: "https://tawk.to/chat/5f6acdfff0e7167d0012e24c/default",
+        }}
+        injectedJavaScriptBeforeContentLoaded={injectJS}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -229,7 +246,7 @@ const Stack = createStackNavigator();
 
 function App() {
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={nav}>
       <Stack.Navigator>
         <Stack.Screen
           name="Login"
@@ -239,11 +256,11 @@ function App() {
           }}
         />
         <Stack.Screen
-          name="DrawerPrueba"
-          component={DrawerPrueba}
-          /* options={{
-            headerLeft: null,
-          }} */
+          name="Tawkto"
+          component={Tawkto}
+          options={{
+            headerShown: false,
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
