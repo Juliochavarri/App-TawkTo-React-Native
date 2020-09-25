@@ -153,7 +153,6 @@ function Login({ navigation }) {
                   inputUser.current.clear();
                   inputPwd.current.clear();
                   id = data.id;
-                  console.log("ID" + id);
                   navigation.navigate("Tawkto", { userID: id });
                 } else {
                   inputUser.current.clear();
@@ -249,26 +248,41 @@ const codigo = `var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
      })();`;
 
 class Chat extends React.Component {
-  componentDidMount() {
+  async componentDidMount() {
     this.setState({
-      ID: this.props.navigation.dangerouslyGetParent().dangerouslyGetState()
-        .routes[1].params.userID,
+      ID: await this.props.navigation
+        .dangerouslyGetParent()
+        .dangerouslyGetState().routes[1].params.userID,
     });
+    const ID = this.state.ID;
+    console.log("ID: " + ID);
+    const url = `http://devapi.doktuz.com:8080/goambu/api/v2/clients?user_id=${ID}`;
+    console.log("Url: " + url);
+    const res = await fetch(url);
+    const data = await res.json();
+    this.setState({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+    });
+    console.log(this.state);
   }
   constructor(props) {
     super(props);
     this.state = {
       ID: "",
+      firstName: "",
+      lastName: "",
+      email: "",
     };
   }
   render() {
     const { navigation } = this.props;
-    const ID = this.state.ID;
     const injectJS = `
     var Tawk_API=Tawk_API||{};
     Tawk_API.visitor = {
-    name : ${user},
-    email : ${user},
+    name : ${this.state.firstName},
+    email : ${this.state.email},
     };
     var Tawk_LoadStart=new Date();
       `;
@@ -284,7 +298,6 @@ class Chat extends React.Component {
           title="Settings"
           onPress={() => {
             navigation.toggleDrawer();
-            console.log(ID);
           }}
         />
         <WebView
@@ -298,19 +311,6 @@ class Chat extends React.Component {
 }
 
 const Stack = createStackNavigator();
-
-/*<Button
-        title="Settings"
-        onPress={() => {
-          navigation.toggleDrawer();
-        }}
-      />
-      <WebView
-        source={{
-          uri: "https://tawk.to/chat/5f6acdfff0e7167d0012e24c/default",
-        }}
-        injectedJavaScriptBeforeContentLoaded={injectJS}
-      /> */
 
 function App() {
   return (
