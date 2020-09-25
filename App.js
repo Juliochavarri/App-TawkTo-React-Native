@@ -7,6 +7,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   SafeAreaView,
+  StatusBar,
   View,
   Text,
 } from "react-native";
@@ -25,11 +26,13 @@ import {
 
 let user = "";
 let pwd = "";
+let id = "";
 const Drawer = createDrawerNavigator();
 const inputUser = createRef();
 const inputPwd = createRef();
 const btnSign = createRef();
 const nav = createRef();
+
 function Login({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [showSnack, setShowSnack] = useState(false);
@@ -149,7 +152,9 @@ function Login({ navigation }) {
                 if (data.currentStatus == "ACTIVE") {
                   inputUser.current.clear();
                   inputPwd.current.clear();
-                  navigation.navigate("Tawkto");
+                  id = data.id;
+                  console.log("ID" + id);
+                  navigation.navigate("Tawkto", { userID: id });
                 } else {
                   inputUser.current.clear();
                   inputPwd.current.clear();
@@ -213,20 +218,88 @@ function Tawkto() {
     </Drawer.Navigator>
   );
 }
+const html = `
+<!DOCTYPE html>
+<html>
+     <body style="background-color:grey;">
+     <p>Hola mundo</p>
+     <script type="text/javascript">
+     alert(document.querySelector("p").innerText);
+     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+     (function(){
+     var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+     s1.async=true;
+     s1.src='https://embed.tawk.to/5f6acdfff0e7167d0012e24c/default';
+     s1.charset='UTF-8';
+     s1.setAttribute('crossorigin','*');
+     s0.parentNode.insertBefore(s1,s0);
+     })();
+     </script>
+     </body>
+</html>`;
 
-function Chat({ navigation }) {
-  const injectJS = `
-  var Tawk_API=Tawk_API||{};
-  Tawk_API.visitor = {
-  name : ${user},
-  email : ${user},
-  };
-  var Tawk_LoadStart=new Date();
-    `;
+const codigo = `var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+     (function(){
+     var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+     s1.async=true;
+     s1.src='https://embed.tawk.to/5f6acdfff0e7167d0012e24c/default';
+     s1.charset='UTF-8';
+     s1.setAttribute('crossorigin','*');
+     s0.parentNode.insertBefore(s1,s0);
+     })();`;
 
-  return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 60 }}>
-      <Button
+class Chat extends React.Component {
+  componentDidMount() {
+    this.setState({
+      ID: this.props.navigation.dangerouslyGetParent().dangerouslyGetState()
+        .routes[1].params.userID,
+    });
+  }
+  constructor(props) {
+    super(props);
+    this.state = {
+      ID: "",
+    };
+  }
+  render() {
+    const { navigation } = this.props;
+    const ID = this.state.ID;
+    const injectJS = `
+    var Tawk_API=Tawk_API||{};
+    Tawk_API.visitor = {
+    name : ${user},
+    email : ${user},
+    };
+    var Tawk_LoadStart=new Date();
+      `;
+
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          marginTop: StatusBar.currentHeight,
+        }}
+      >
+        <Button
+          title="Settings"
+          onPress={() => {
+            navigation.toggleDrawer();
+            console.log(ID);
+          }}
+        />
+        <WebView
+          source={{
+            uri: "https://tawk.to/chat/5f6acdfff0e7167d0012e24c/default",
+          }}
+        />
+      </SafeAreaView>
+    );
+  }
+}
+
+const Stack = createStackNavigator();
+
+/*<Button
         title="Settings"
         onPress={() => {
           navigation.toggleDrawer();
@@ -237,16 +310,11 @@ function Chat({ navigation }) {
           uri: "https://tawk.to/chat/5f6acdfff0e7167d0012e24c/default",
         }}
         injectedJavaScriptBeforeContentLoaded={injectJS}
-      />
-    </SafeAreaView>
-  );
-}
-
-const Stack = createStackNavigator();
+      /> */
 
 function App() {
   return (
-    <NavigationContainer ref={nav}>
+    <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
           name="Login"
@@ -266,22 +334,6 @@ function App() {
     </NavigationContainer>
   );
 }
-
-/*
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/5f6acdfff0e7167d0012e24c/default';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->*/
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
