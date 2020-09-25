@@ -294,12 +294,26 @@ class Chat extends React.Component {
           marginTop: StatusBar.currentHeight,
         }}
       >
-        <Button
-          title="Settings"
-          onPress={() => {
-            navigation.toggleDrawer();
+        <View
+          style={{
+            flexDirection: "row",
+            height: 60,
+            alignItems: "center",
           }}
-        />
+        >
+          <Text style={{ fontSize: 20, flex: 10, textAlign: "center" }}>
+            Welcome {this.state.firstName}
+          </Text>
+          <Icon
+            name="bars"
+            size={24}
+            style={{ flex: 1 }}
+            onPress={() => {
+              navigation.toggleDrawer();
+            }}
+          />
+        </View>
+
         <WebView
           source={{
             uri: "https://tawk.to/chat/5f6acdfff0e7167d0012e24c/default",
